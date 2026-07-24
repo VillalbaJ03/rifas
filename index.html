@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+<title>Generador de Tickets de Rifa</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Dancing+Script:wght@700&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c1:#1a7a8a; --c2:#d32f2f;
+  --font-display:'Oswald','Arial Narrow','Franklin Gothic Medium',Impact,sans-serif;
+  --font-script:'Dancing Script','Segoe Script','Brush Script MT',cursive;
+  --font-body:'Montserrat','Segoe UI',system-ui,-apple-system,sans-serif;
+  --ui-bg:#eef1f6; --ui-card:#fff; --ui-text:#1f2933; --ui-muted:#6b7280; --ui-line:#dde3ea;
+  --ui-field:#fff; --ui-stage:#f4f6f9; --ui-chip:#eef1f6; --ui-shadow:rgba(16,24,40,.08);
+  color-scheme:light;
+}
+/* El papel (ticket y hoja) siempre es blanco; sólo cambia la interfaz. */
+@media (prefers-color-scheme:dark){
+  :root{
+    --ui-bg:#12161c; --ui-card:#1b212a; --ui-text:#e6ebf2; --ui-muted:#97a3b2; --ui-line:#2c3542;
+    --ui-field:#141a21; --ui-stage:#0f1319; --ui-chip:#232b36; --ui-shadow:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ui-bg:#12161c; --ui-card:#1b212a; --ui-text:#e6ebf2; --ui-muted:#97a3b2; --ui-line:#2c3542;
+  --ui-field:#141a21; --ui-stage:#0f1319; --ui-chip:#232b36; --ui-shadow:rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --ui-bg:#eef1f6; --ui-card:#fff; --ui-text:#1f2933; --ui-muted:#6b7280; --ui-line:#dde3ea;
+  --ui-field:#fff; --ui-stage:#f4f6f9; --ui-chip:#eef1f6; --ui-shadow:rgba(16,24,40,.08);
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--ui-bg);color:var(--ui-text);min-height:100vh}
+
+/* ===================== LAYOUT UI ===================== */
+.app{display:grid;grid-template-columns:340px 1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto;align-items:start}
+@media (max-width:980px){.app{grid-template-columns:1fr}}
+
+.panel{background:var(--ui-card);border-radius:12px;box-shadow:0 2px 14px var(--ui-shadow);padding:16px;position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto}
+@media (max-width:980px){.panel{position:static;max-height:none}}
+.panel h1{font-size:16px;font-weight:800;letter-spacing:.3px;margin-bottom:2px}
+.panel .sub{font-size:11.5px;color:var(--ui-muted);margin-bottom:14px}
+
+details.sec{border:1px solid var(--ui-line);border-radius:9px;margin-bottom:9px;overflow:hidden;background:var(--ui-bg)}
+details.sec>summary{cursor:pointer;list-style:none;padding:10px 12px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--c1);display:flex;align-items:center;justify-content:space-between;user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'+';font-size:15px;color:var(--ui-muted)}
+details.sec[open]>summary::after{content:'\2212'}
+.sec-body{padding:4px 12px 13px}
+
+.field{margin-bottom:9px}
+.field>label{display:block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ui-muted);margin-bottom:3px}
+.field input[type=text],.field input[type=number],.field textarea,.field select{
+  width:100%;padding:7px 9px;border:1.5px solid var(--ui-line);border-radius:6px;
+  font-family:var(--font-body);font-size:13px;font-weight:600;background:var(--ui-field);color:var(--ui-text)}
+.field textarea{resize:vertical;min-height:52px;line-height:1.45}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--c1)}
+.field .hint{font-size:10.5px;color:var(--ui-muted);margin-top:3px;line-height:1.35}
+.row{display:grid;gap:8px}
+.row.c2{grid-template-columns:1fr 1fr}
+.row.c3{grid-template-columns:1fr 1fr 1fr}
+
+.check{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:8px;cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--c1);cursor:pointer}
+
+.color-row{display:flex;gap:10px}
+.color-row .cf{flex:1}
+.color-row input[type=color]{width:100%;height:34px;border:1.5px solid var(--ui-line);border-radius:6px;padding:2px;background:var(--ui-field);cursor:pointer}
+
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:6px 11px;border:1.5px solid var(--ui-line);background:var(--ui-field);border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ui-muted);transition:.15s}
+.chip:hover{border-color:var(--c1);color:var(--c1)}
+.chip.on{background:var(--c1);border-color:var(--c1);color:#fff}
+
+.info-item{display:grid;grid-template-columns:46px 1fr 28px;gap:5px;margin-bottom:6px;align-items:center}
+.info-item input{padding:6px 7px!important;font-size:12.5px!important}
+.info-item .del{border:none;background:rgba(198,40,40,.14);color:#e06060;border-radius:6px;height:30px;cursor:pointer;font-weight:800;font-size:14px;line-height:1}
+.info-item .del:hover{background:#f9d5d5}
+.btn-add{width:100%;padding:7px;border:1.5px dashed var(--ui-line);background:var(--ui-field);border-radius:6px;font-size:12px;font-weight:700;color:var(--ui-muted);cursor:pointer}
+.btn-add:hover{border-color:var(--c1);color:var(--c1)}
+
+.btn{padding:10px 14px;border:none;border-radius:7px;font-family:var(--font-body);font-weight:800;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-primary{background:var(--c1);color:#fff}
+.btn-primary:hover{filter:brightness(.9)}
+.btn-danger{background:var(--c2);color:#fff}
+.btn-danger:hover{filter:brightness(.9)}
+.btn-ghost{background:var(--ui-field);border:1.5px solid var(--ui-line);color:var(--ui-text)}
+.btn-ghost:hover{border-color:var(--c1);color:var(--c1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:grid;gap:7px;margin-top:12px}
+.actions .row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* ===================== WORKSPACE ===================== */
+.workspace{background:var(--ui-card);border-radius:12px;box-shadow:0 2px 14px var(--ui-shadow);padding:16px 18px;min-height:70vh}
+.ws-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.tabs{display:flex;background:var(--ui-chip);border-radius:8px;padding:3px;gap:3px}
+.tab{padding:7px 15px;border:none;background:transparent;border-radius:6px;font-family:var(--font-body);font-size:12.5px;font-weight:800;color:var(--ui-muted);cursor:pointer}
+.tab.on{background:var(--ui-card);color:var(--c1);box-shadow:0 1px 4px var(--ui-shadow)}
+.nav{display:flex;align-items:center;gap:8px}
+.nav button{padding:6px 12px;border:1.5px solid var(--ui-line);background:var(--ui-field);border-radius:6px;font-weight:800;font-size:12.5px;cursor:pointer;color:var(--c1)}
+.nav button:hover:not(:disabled){background:var(--c1);color:#fff;border-color:var(--c1)}
+.nav button:disabled{opacity:.35;cursor:not-allowed}
+.nav .count{font-size:13px;font-weight:800;min-width:120px;text-align:center}
+
+.stage{background:var(--ui-stage);border-radius:10px;padding:22px;display:flex;justify-content:center;align-items:flex-start;overflow:auto}
+.edit-tip{font-size:11.5px;color:var(--ui-muted);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.edit-tip b{color:var(--c1)}
+.fit{display:flex;justify-content:center}
+.fit-inner{transform-origin:top center}
+
+/* ===================== TICKET ===================== */
+.ticket{
+  width:640px;height:220px;background:#fff;border:2px solid var(--c1);border-radius:4px;
+  display:grid;grid-template-columns:23.5% 1fr 1fr;overflow:hidden;position:relative;
+  font-family:var(--font-body);color:#222;flex:none}
+.ticket.tall .t-left,.ticket.tall .t-right,.ticket.tall .t-stub{padding-top:16px;padding-bottom:14px}
+.ticket.no-stub{grid-template-columns:1fr 1fr}
+
+.t-stub{padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;border-right:2px dashed #999;background:var(--stub-bg,#f7fbfc);position:relative}
+.t-stub::after{content:'\2702';position:absolute;top:50%;right:-9px;transform:translateY(-50%);font-size:14px;color:#999}
+.t-stub-title{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--c1);text-align:center;letter-spacing:1px;line-height:1.15;text-transform:uppercase}
+.t-stub-num{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--c2);letter-spacing:1px;text-align:center;margin:2px 0}
+.t-stub-fields{width:100%;display:flex;flex-direction:column;gap:2px}
+.t-stub-field{width:100%}
+.t-stub-label{font-size:7.5px;font-weight:800;color:var(--c1);text-transform:uppercase;letter-spacing:.5px}
+.t-stub-line{width:100%;border-bottom:1px solid #666;height:15px;display:block}
+
+.t-left{padding:10px 14px 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.t-deco-frame{border:3px solid var(--c1);border-radius:10px;padding:6px 18px 4px;text-align:center;position:relative;background:#fff}
+.t-deco-frame.plain{border:none;padding:2px 0 0}
+.t-deco-frame::before{content:"\2665  \2605  \2665";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#fff;padding:0 6px;color:var(--c1);font-size:10px;letter-spacing:3px}
+.t-deco-frame.plain::before{display:none}
+.t-gran{font-family:var(--font-script);color:var(--c1);font-size:18px;line-height:1.1;font-weight:700}
+.t-rifa{font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--c1);line-height:1;letter-spacing:4px}
+.t-solidaria{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--c1);line-height:1.1;letter-spacing:3px}
+.t-premio-bar{background:var(--c1);color:#fff;padding:3px 20px;text-align:center;font-weight:800;font-size:13px;letter-spacing:2px;width:100%;margin-top:6px}
+.t-prizes{margin-top:4px;text-align:center}
+.t-prize{font-size:12px;font-weight:700;color:#222;line-height:1.3}
+.t-bottom{text-align:center;width:100%}
+.t-number{font-size:20px;font-weight:800;color:var(--c2);letter-spacing:2px;font-family:var(--font-display)}
+.t-range{font-size:9px;font-weight:600;color:#777;margin-top:1px}
+
+.t-right{padding:10px 12px 8px;display:flex;flex-direction:column;justify-content:space-between}
+.t-org-row{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.t-org-text{flex:1;min-width:0}
+.t-org-label{font-size:13px;font-weight:800;color:#222}
+.t-org-name{font-size:16px;font-weight:800;color:var(--c1);line-height:1.2}
+.t-seal{background:var(--c1);color:#fff;border-radius:50%;width:64px;height:64px;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:10px;border:3px solid #c9dfe3;box-shadow:0 1px 4px rgba(0,0,0,.2);text-align:center;padding:2px}
+.t-seal-price{font-size:19px;font-weight:800;line-height:1.1}
+.t-emojis{text-align:center;font-size:28px;line-height:1;margin:4px 0}
+.t-info-boxes{display:flex;flex-direction:column;gap:3px}
+.t-info-box{border:1px solid #bbb;border-radius:3px;padding:2px 6px;font-size:9.5px;font-weight:600;color:#333;display:flex;align-items:center;gap:4px}
+.t-info-icon{font-size:11px;flex:none}
+.t-contact{font-size:8px;color:#555;text-align:center;line-height:1.25;margin-top:2px}
+
+/* Edición directa sobre el ticket */
+.ticket [contenteditable]{outline:none;border-radius:2px;transition:background .12s,box-shadow .12s}
+.ticket [contenteditable]:hover{background:rgba(26,122,138,.09);box-shadow:0 0 0 2px rgba(26,122,138,.12)}
+.ticket [contenteditable]:focus{background:#fff8d6;box-shadow:0 0 0 2px rgba(214,158,0,.55)}
+
+/* ===================== HOJAS ===================== */
+.sheet{
+  background:#fff;box-shadow:0 2px 12px rgba(16,24,40,.16);
+  width:var(--sw);height:var(--sh);padding:var(--pad);
+  display:grid;grid-template-columns:repeat(var(--cols),1fr);
+  grid-auto-rows:var(--cellh);gap:var(--gap);
+  align-content:start;justify-items:center;align-items:center;overflow:hidden}
+.cell{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.cell.cut{border:1px dashed #c8c8c8}
+.holder{position:relative;flex:none}
+.holder>.ticket{position:absolute;top:0;left:0;transform-origin:top left}
+.sheet-wrap{overflow:hidden}
+.sheet-scale{transform-origin:top left}
+
+#printRoot{display:none}
+
+/* ===================== IMPRESIÓN ===================== */
+@media print{
+  @page{margin:0}
+  html,body{background:#fff!important;margin:0!important;padding:0!important;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .app,.noprint{display:none!important}
+  #printRoot{display:block!important}
+  #printRoot .sheet{box-shadow:none!important;margin:0!important;
+    height:calc(var(--sh) - 0.2mm);break-after:page;page-break-after:always}
+  #printRoot .sheet:last-child{break-after:auto;page-break-after:auto}
+  .cell,.holder,.ticket{break-inside:avoid;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============ PANEL ============ -->
+  <aside class="panel">
+    <h1>&#127903; Generador de Rifas</h1>
+    <div class="sub">Todos los campos son editables. También puedes escribir directamente sobre el ticket.</div>
+
+    <details class="sec" open>
+      <summary>Impresión y hoja</summary>
+      <div class="sec-body">
+        <div class="field">
+          <label>Tickets por hoja</label>
+          <div class="chips" id="chipsPerSheet"></div>
+          <input type="number" id="perSheet" min="1" max="40" style="margin-top:7px">
+        </div>
+        <div class="field">
+          <label>Columnas</label>
+          <div class="chips" id="chipsCols"></div>
+        </div>
+        <div class="row c2">
+          <div class="field">
+            <label>Tamaño de papel</label>
+            <select id="paper">
+              <option value="a4">A4 (210 × 297 mm)</option>
+              <option value="letter">Carta (216 × 279 mm)</option>
+              <option value="legal">Oficio (216 × 356 mm)</option>
+              <option value="a5">A5 (148 × 210 mm)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Orientación</label>
+            <select id="orient">
+              <option value="portrait">Vertical</option>
+              <option value="landscape">Horizontal</option>
+            </select>
+          </div>
+        </div>
+        <div class="row c2">
+          <div class="field"><label>Margen (mm)</label><input type="number" id="margin" min="0" max="25" step="1"></div>
+          <div class="field"><label>Separación (mm)</label><input type="number" id="gap" min="0" max="20" step="1"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="autoFit"> Estirar tickets para llenar la hoja</label>
+        <div class="field">
+          <label>Alto base del ticket</label>
+          <input type="number" id="tHeight" min="200" max="520" step="10">
+          <div class="hint">Súbelo si quieres tickets más altos y con más aire.</div>
+        </div>
+        <label class="check"><input type="checkbox" id="cutLines"> Marcar líneas de corte</label>
+        <div class="field"><div class="hint" id="layoutInfo"></div></div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Numeración</summary>
+      <div class="sec-body">
+        <div class="row c3">
+          <div class="field"><label>Cantidad</label><input type="number" id="qty" min="1" max="2000"></div>
+          <div class="field"><label>Desde el N°</label><input type="number" id="start" min="0" max="999999"></div>
+          <div class="field"><label>Dígitos</label><input type="number" id="digits" min="1" max="10"></div>
+        </div>
+        <div class="row c2">
+          <div class="field"><label>Prefijo</label><input type="text" id="prefix" placeholder="Ej: A-"></div>
+          <div class="field"><label>Sufijo</label><input type="text" id="suffix" placeholder="Ej: /26"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="showRange"> Mostrar rango bajo el número</label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Título</summary>
+      <div class="sec-body">
+        <div class="field"><label>Línea superior (cursiva)</label><input type="text" id="titleTop"></div>
+        <div class="field"><label>Línea principal</label><input type="text" id="titleMain"></div>
+        <div class="field"><label>Línea inferior</label><input type="text" id="titleSub"></div>
+        <label class="check"><input type="checkbox" id="showFrame"> Marco decorativo</label>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Premios</summary>
+      <div class="sec-body">
+        <div class="field"><label>Texto de la barra</label><input type="text" id="prizeBar"></div>
+        <div class="field">
+          <label>Premios</label>
+          <textarea id="prizes" rows="3"></textarea>
+          <div class="hint">Un premio por línea.</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Organizador y precio</summary>
+      <div class="sec-body">
+        <div class="field"><label>Etiqueta</label><input type="text" id="orgLabel"></div>
+        <div class="field">
+          <label>Nombre del organizador</label>
+          <textarea id="orgName" rows="2"></textarea>
+          <div class="hint">Una línea por renglón.</div>
+        </div>
+        <div class="row c2">
+          <div class="field"><label>Texto del sello</label><input type="text" id="priceLabel"></div>
+          <div class="field"><label>Precio</label><input type="text" id="price"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="showSeal"> Mostrar sello de precio</label>
+        <div class="field"><label>Emojis / adorno</label><input type="text" id="emojis"></div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Fecha, hora y lugar</summary>
+      <div class="sec-body">
+        <div id="infoEditor"></div>
+        <button class="btn-add" id="btnAddInfo">+ Agregar línea</button>
+        <div class="field" style="margin-top:10px">
+          <label>Nota final</label>
+          <textarea id="note" rows="2"></textarea>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Talón del organizador</summary>
+      <div class="sec-body">
+        <label class="check"><input type="checkbox" id="showStub"> Incluir talón recortable</label>
+        <div class="field">
+          <label>Título del talón</label>
+          <textarea id="stubTitle" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Campos para llenar</label>
+          <textarea id="stubFields" rows="3"></textarea>
+          <div class="hint">Un campo por línea (Nombre, Celular…).</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="sec">
+      <summary>Colores</summary>
+      <div class="sec-body">
+        <div class="color-row">
+          <div class="cf"><div class="field"><label>Principal</label><input type="color" id="c1"></div></div>
+          <div class="cf"><div class="field"><label>Números</label><input type="color" id="c2"></div></div>
+        </div>
+        <div class="chips" id="chipsTheme"></div>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button class="btn btn-danger" id="btnPrintAll">&#128424; Imprimir todos los tickets</button>
+      <div class="row2">
+        <button class="btn btn-primary" id="btnPrintSheet">Imprimir esta hoja</button>
+        <button class="btn btn-primary" id="btnPrintOne">Imprimir 1 ticket</button>
+      </div>
+      <div class="row2">
+        <button class="btn btn-ghost" id="btnExport">Guardar diseño</button>
+        <button class="btn btn-ghost" id="btnImport">Cargar diseño</button>
+      </div>
+      <button class="btn btn-ghost" id="btnReset">Restablecer todo</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none">
+    </div>
+  </aside>
+
+  <!-- ============ WORKSPACE ============ -->
+  <main class="workspace">
+    <div class="ws-head">
+      <div class="tabs">
+        <button class="tab on" data-view="ticket">Ticket</button>
+        <button class="tab" data-view="sheet">Hoja de impresión</button>
+      </div>
+      <div class="nav">
+        <button id="btnPrev">&#9664;</button>
+        <div class="count" id="counter"></div>
+        <button id="btnNext">&#9654;</button>
+      </div>
+    </div>
+    <div class="edit-tip" id="frameTip" style="display:none">
+      <b>&#8505; Para imprimir:</b> <a id="openTab" href="#" target="_blank" rel="noopener" style="color:var(--c1)">abre esta página en una pestaña nueva</a> y desactiva encabezados y pies en el diálogo de impresión.
+    </div>
+    <div class="edit-tip" id="editTip"><b>&#9998; Edición directa:</b> haz clic sobre cualquier texto del ticket y escribe.</div>
+    <div class="stage" id="stage"></div>
+  </main>
+</div>
+
+<div id="printRoot"></div>
+
+<script>
+'use strict';
+
+var MM = 96 / 25.4;
+var PAPERS = { a4:[210,297], letter:[215.9,279.4], legal:[215.9,355.6], a5:[148,210] };
+var STORE = 'rifaGen.v2';
+
+var DEFAULTS = {
+  qty:100, start:1, digits:3, prefix:'', suffix:'', showRange:true,
+  titleTop:'Gran', titleMain:'RIFA', titleSub:'SOLIDARIA',
+  showFrame:true,
+  prizeBar:'PREMIO', prizes:'Premio Sorpresa',
+  orgLabel:'Organiza', orgName:'Amistades\nEloy Alfaro',
+  priceLabel:'Valor:', price:'$0.50', showSeal:true,
+  emojis:'🎁🎁🎁',
+  info:[
+    {icon:'📅', text:'Jueves, 09 de Julio del 2026'},
+    {icon:'🕐', text:'20h00 (8PM)'},
+    {icon:'📍', text:'Tienda Cielo'}
+  ],
+  note:'El ganador será contactado vía WhatsApp o se le entregará si está presente',
+  showStub:true, stubTitle:'Rifa\nSolidaria', stubFields:'Nombre\nCelular',
+  c1:'#1a7a8a', c2:'#d32f2f',
+  paper:'a4', orient:'portrait', margin:8, perSheet:6, cols:2, gap:3, cutLines:false,
+  tHeight:220, autoFit:true
+};
+
+var THEMES = [
+  {n:'Turquesa', a:'#1a7a8a', b:'#d32f2f'},
+  {n:'Vino',     a:'#8e1d3d', b:'#0b6b4f'},
+  {n:'Azul',     a:'#1c4e9c', b:'#e8590c'},
+  {n:'Verde',    a:'#1f7a44', b:'#c2185b'},
+  {n:'Morado',   a:'#5b2d8e', b:'#d17b00'},
+  {n:'Negro',    a:'#222222', b:'#c62828'}
+];
+
+var state = load();
+var view = 'ticket';
+var idx = 0;      // ticket actual
+var page = 0;     // hoja actual
+
+/* ---------- utilidades ---------- */
+function load(){
+  var s = JSON.parse(JSON.stringify(DEFAULTS));
+  try{
+    var raw = localStorage.getItem(STORE);
+    if(raw){
+      var o = JSON.parse(raw);
+      for(var k in DEFAULTS) if(o[k] !== undefined && o[k] !== null) s[k] = o[k];
+      if(!Array.isArray(s.info)) s.info = JSON.parse(JSON.stringify(DEFAULTS.info));
+    }
+  }catch(e){}
+  return s;
+}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nl(t){ return esc(t).replace(/\n/g,'<br>'); }
+function lines(t){ return String(t==null?'':t).split('\n').filter(function(x){ return x.trim()!==''; }); }
+function pad(n, len){ var s = String(n); while(s.length < len) s = '0' + s; return s; }
+function num(i){ return state.prefix + pad(Number(state.start) + i, Number(state.digits)) + state.suffix; }
+function clamp(v, a, b){ v = Number(v); if(isNaN(v)) v = a; return Math.max(a, Math.min(b, v)); }
+function ed(f, i){ return ' data-f="' + f + '"' + (i===undefined ? '' : ' data-i="' + i + '"'); }
+
+/* ---------- construcción del ticket ---------- */
+function ticketWidth(){ return state.showStub ? 640 : 490; }
+function ticketHeight(){ return clamp(state.tHeight, 200, 520); }
+
+function buildTicket(i, editable, dims){
+  var e = editable ? ' contenteditable="true" spellcheck="false"' : '';
+  var n = num(i);
+  var tw = dims && dims.w ? dims.w : ticketWidth();
+  var th = dims && dims.h ? dims.h : ticketHeight();
+  var st = 'width:' + tw + 'px;height:' + th + 'px' +
+           (dims && dims.scale ? ';transform:scale(' + dims.scale + ')' : '');
+  var h = '';
+
+  if(state.showStub){
+    h += '<div class="t-stub">';
+    h += '<div class="t-stub-title"' + e + ed('stubTitle') + '>' + nl(state.stubTitle) + '</div>';
+    h += '<div class="t-stub-num">N&#176; ' + esc(n) + '</div>';
+    h += '<div class="t-stub-fields">';
+    lines(state.stubFields).forEach(function(f, k){
+      h += '<div class="t-stub-field"><div class="t-stub-label"' + e + ed('stubField', k) + '>' + esc(f) + ':</div><div class="t-stub-line"></div></div>';
+    });
+    h += '</div></div>';
+  }
+
+  /* --- izquierda --- */
+  h += '<div class="t-left">';
+  h += '<div class="t-deco-frame' + (state.showFrame ? '' : ' plain') + '">';
+  if(state.titleTop) h += '<div class="t-gran"' + e + ed('titleTop') + '>' + esc(state.titleTop) + '</div>';
+  if(state.titleMain) h += '<div class="t-rifa"' + e + ed('titleMain') + '>' + esc(state.titleMain) + '</div>';
+  if(state.titleSub) h += '<div class="t-solidaria"' + e + ed('titleSub') + '>' + esc(state.titleSub) + '</div>';
+  h += '</div>';
+  if(state.prizeBar) h += '<div class="t-premio-bar"' + e + ed('prizeBar') + '>' + esc(state.prizeBar) + '</div>';
+  h += '<div class="t-prizes">';
+  lines(state.prizes).forEach(function(p, k){
+    h += '<div class="t-prize"><span' + e + ed('prize', k) + '>&#8226; ' + esc(p) + '</span></div>';
+  });
+  h += '</div>';
+  h += '<div class="t-bottom"><div class="t-number">' + esc(n) + '</div>';
+  if(state.showRange){
+    var a = state.prefix + pad(Number(state.start), Number(state.digits)) + state.suffix;
+    var b = state.prefix + pad(Number(state.start) + Number(state.qty) - 1, Number(state.digits)) + state.suffix;
+    h += '<div class="t-range">' + esc(a) + ' - ' + esc(b) + '</div>';
+  }
+  h += '</div></div>';
+
+  /* --- derecha --- */
+  h += '<div class="t-right">';
+  h += '<div class="t-org-row"><div class="t-org-text">';
+  if(state.orgLabel) h += '<div class="t-org-label"' + e + ed('orgLabel') + '>' + esc(state.orgLabel) + '</div>';
+  h += '<div class="t-org-name"' + e + ed('orgName') + '>' + nl(state.orgName) + '</div></div>';
+  if(state.showSeal){
+    h += '<div class="t-seal"><div' + e + ed('priceLabel') + '>' + esc(state.priceLabel) + '</div>';
+    h += '<div class="t-seal-price"' + e + ed('price') + '>' + esc(state.price) + '</div></div>';
+  }
+  h += '</div>';
+  if(state.emojis) h += '<div class="t-emojis"' + e + ed('emojis') + '>' + esc(state.emojis) + '</div>';
+  h += '<div class="t-info-boxes">';
+  state.info.forEach(function(it, k){
+    h += '<div class="t-info-box"><span class="t-info-icon">' + esc(it.icon) + '</span><span' + e + ed('infoText', k) + '>' + esc(it.text) + '</span></div>';
+  });
+  h += '</div>';
+  if(state.note) h += '<div class="t-contact"' + e + ed('note') + '>' + esc(state.note) + '</div>';
+  h += '</div>';
+
+  var cls = 'ticket' + (state.showStub ? '' : ' no-stub') + (th >= 280 ? ' tall' : '');
+  return '<div class="' + cls + '" style="' + st + '">' + h + '</div>';
+}
+
+/* ---------- geometría de la hoja ---------- */
+function layout(){
+  var p = PAPERS[state.paper] || PAPERS.a4;
+  var w = p[0], hh = p[1];
+  if(state.orient === 'landscape'){ var t = w; w = hh; hh = t; }
+  var per  = clamp(state.perSheet, 1, 40);
+  var cols = Math.min(clamp(state.cols, 1, 6), per);
+  var rows = Math.ceil(per / cols);
+  var m = clamp(state.margin, 0, 25);
+  var g = clamp(state.gap, 0, 20);
+  var availW = w - m * 2, availH = hh - m * 2;
+  var cellW = (availW - (cols - 1) * g) / cols;
+  var cellH = (availH - (rows - 1) * g) / rows;
+
+  // El ticket se agranda (nunca se encoge) hasta igualar la proporción de la
+  // celda: así llena el espacio disponible sin recortar ningún contenido.
+  var baseW = ticketWidth(), baseH = ticketHeight();
+  var tw = baseW, th = baseH;
+  if(state.autoFit && cellH > 0){
+    var cellRatio = cellW / cellH;
+    // Se limita el estiramiento para que el contenido no quede disperso.
+    if(cellRatio > baseW / baseH) tw = Math.min(baseH * cellRatio, baseW * 2.6);
+    else th = Math.min(baseW / cellRatio, baseH * 1.5);
+  }
+  var scale = Math.min(cellW * MM / tw, cellH * MM / th);
+  if(scale < 0.05) scale = 0.05;
+  return {w:w, h:hh, per:per, cols:cols, rows:rows, m:m, g:g,
+          cellW:cellW, cellH:cellH, scale:scale, tw:tw, th:th};
+}
+
+function buildSheet(from, count, L, editable){
+  var s = '<div class="sheet" style="' +
+    '--sw:' + L.w + 'mm;--sh:' + L.h + 'mm;--pad:' + L.m + 'mm;--gap:' + L.g + 'mm;' +
+    '--cols:' + L.cols + ';--cellh:' + L.cellH + 'mm">';
+  for(var i = from; i < from + count; i++){
+    s += '<div class="cell' + (state.cutLines ? ' cut' : '') + '">';
+    s += '<div class="holder" style="width:' + (L.tw * L.scale) + 'px;height:' + (L.th * L.scale) + 'px">';
+    s += buildTicket(i, editable, {w:L.tw, h:L.th, scale:L.scale});
+    s += '</div></div>';
+  }
+  return s + '</div>';
+}
+
+/* ---------- render ---------- */
+function render(){
+  document.documentElement.style.setProperty('--c1', state.c1);
+  document.documentElement.style.setProperty('--c2', state.c2);
+  document.documentElement.style.setProperty('--stub-bg', state.c1 + '12');
+
+  var L = layout();
+  var pages = Math.max(1, Math.ceil(state.qty / L.per));
+  if(page >= pages) page = pages - 1;
+  if(idx >= state.qty) idx = state.qty - 1;
+  if(idx < 0) idx = 0;
+
+  var stage = document.getElementById('stage');
+  if(view === 'ticket'){
+    stage.innerHTML = '<div class="fit"><div class="fit-inner">' + buildTicket(idx, true, {w:L.tw, h:L.th}) + '</div></div>';
+    document.getElementById('counter').textContent = 'Ticket ' + (idx + 1) + ' de ' + state.qty;
+    document.getElementById('btnPrev').disabled = (idx === 0);
+    document.getElementById('btnNext').disabled = (idx >= state.qty - 1);
+    document.getElementById('editTip').style.display = 'flex';
+    fitStage(L.tw, L.th);
+  }else{
+    var from = page * L.per;
+    stage.innerHTML = '<div class="sheet-wrap"><div class="sheet-scale">' +
+      buildSheet(from, Math.min(L.per, state.qty - from), L, false) + '</div></div>';
+    document.getElementById('counter').textContent = 'Hoja ' + (page + 1) + ' de ' + pages;
+    document.getElementById('btnPrev').disabled = (page === 0);
+    document.getElementById('btnNext').disabled = (page >= pages - 1);
+    document.getElementById('editTip').style.display = 'none';
+    fitSheet(L);
+  }
+
+  document.getElementById('layoutInfo').innerHTML =
+    '<b>' + L.cols + ' columna' + (L.cols > 1 ? 's' : '') + ' &times; ' + L.rows + ' fila' + (L.rows > 1 ? 's' : '') + '</b> &rarr; ' +
+    L.per + ' por hoja &middot; ' + pages + ' hoja' + (pages > 1 ? 's' : '') + ' en total<br>' +
+    'Tama&ntilde;o real del ticket: ' + (L.tw * L.scale / MM).toFixed(0) + ' &times; ' + (L.th * L.scale / MM).toFixed(0) + ' mm';
+}
+
+function fitStage(w, h){
+  var stage = document.getElementById('stage');
+  var inner = stage.querySelector('.fit-inner');
+  if(!inner) return;
+  var k = Math.min(1, (stage.clientWidth - 44) / w);
+  inner.style.transform = 'scale(' + k + ')';
+  inner.style.width = w + 'px';
+  inner.style.height = (h * k) + 'px';
+}
+
+function fitSheet(L){
+  var stage = document.getElementById('stage');
+  var wrap = stage.querySelector('.sheet-wrap');
+  var sc = stage.querySelector('.sheet-scale');
+  if(!sc) return;
+  var pxW = L.w * MM, pxH = L.h * MM;
+  var k = Math.min(1, (stage.clientWidth - 44) / pxW, (window.innerHeight * 0.72) / pxH);
+  sc.style.transform = 'scale(' + k + ')';
+  wrap.style.width = (pxW * k) + 'px';
+  wrap.style.height = (pxH * k) + 'px';
+}
+
+/* ---------- panel <-> estado ---------- */
+var TEXT_FIELDS = ['prefix','suffix','titleTop','titleMain','titleSub','prizeBar','prizes',
+  'orgLabel','orgName','priceLabel','price','emojis','note','stubTitle','stubFields','c1','c2','paper','orient'];
+var NUM_FIELDS = ['qty','start','digits','margin','gap','perSheet','tHeight'];
+var BOOL_FIELDS = ['showRange','showFrame','showSeal','showStub','cutLines','autoFit'];
+
+function syncPanel(){
+  TEXT_FIELDS.concat(NUM_FIELDS).forEach(function(f){
+    var el = document.getElementById(f);
+    if(el && el.value !== String(state[f])) el.value = state[f];
+  });
+  BOOL_FIELDS.forEach(function(f){
+    var el = document.getElementById(f);
+    if(el) el.checked = !!state[f];
+  });
+  paintChips();
+}
+
+function bindPanel(){
+  TEXT_FIELDS.forEach(function(f){
+    var el = document.getElementById(f);
+    if(!el) return;
+    el.addEventListener('input', function(){ state[f] = el.value; save(); render(); });
+  });
+  NUM_FIELDS.forEach(function(f){
+    var el = document.getElementById(f);
+    if(!el) return;
+    el.addEventListener('input', function(){
+      var v = parseInt(el.value, 10);
+      if(isNaN(v)) return;
+      var min = Number(el.min), max = Number(el.max);
+      state[f] = clamp(v, min, max);
+      if(f === 'perSheet' && state.cols > state.perSheet) state.cols = state.perSheet;
+      save(); paintChips(); render();
+    });
+    el.addEventListener('blur', function(){
+      el.value = state[f]; render();
+    });
+  });
+  BOOL_FIELDS.forEach(function(f){
+    var el = document.getElementById(f);
+    if(!el) return;
+    el.addEventListener('change', function(){ state[f] = el.checked; save(); render(); });
+  });
+}
+
+function paintChips(){
+  var ps = document.getElementById('chipsPerSheet');
+  ps.innerHTML = [1,2,3,4,6,8,10,12].map(function(v){
+    return '<button class="chip' + (state.perSheet === v ? ' on' : '') + '" data-per="' + v + '">' + v + '</button>';
+  }).join('');
+  var cs = document.getElementById('chipsCols');
+  cs.innerHTML = [1,2,3,4].map(function(v){
+    return '<button class="chip' + (state.cols === v ? ' on' : '') + '" data-col="' + v + '">' + v + (v > 1 ? ' columnas' : ' columna') + '</button>';
+  }).join('');
+  var ts = document.getElementById('chipsTheme');
+  ts.innerHTML = THEMES.map(function(t){
+    return '<button class="chip' + (state.c1.toLowerCase() === t.a ? ' on' : '') + '" data-th="' + t.a + '|' + t.b + '">' + t.n + '</button>';
+  }).join('');
+}
+
+function renderInfoEditor(){
+  var box = document.getElementById('infoEditor');
+  box.innerHTML = state.info.map(function(it, i){
+    return '<div class="info-item">' +
+      '<input type="text" data-ic="' + i + '" value="' + esc(it.icon) + '" maxlength="4">' +
+      '<input type="text" data-it="' + i + '" value="' + esc(it.text) + '">' +
+      '<button class="del" data-dl="' + i + '" title="Eliminar">&times;</button></div>';
+  }).join('');
+}
+
+/* ---------- eventos ---------- */
+bindPanel();
+renderInfoEditor();
+syncPanel();
+
+document.getElementById('infoEditor').addEventListener('input', function(e){
+  var t = e.target;
+  if(t.dataset.ic !== undefined){ state.info[+t.dataset.ic].icon = t.value; }
+  else if(t.dataset.it !== undefined){ state.info[+t.dataset.it].text = t.value; }
+  else return;
+  save(); render();
+});
+document.getElementById('infoEditor').addEventListener('click', function(e){
+  var b = e.target.closest('[data-dl]');
+  if(!b) return;
+  state.info.splice(+b.dataset.dl, 1);
+  save(); renderInfoEditor(); render();
+});
+document.getElementById('btnAddInfo').addEventListener('click', function(){
+  state.info.push({icon:'★', text:'Nuevo dato'});
+  save(); renderInfoEditor(); render();
+});
+
+document.querySelector('.panel').addEventListener('click', function(e){
+  var c = e.target.closest('.chip');
+  if(!c) return;
+  if(c.dataset.per){ state.perSheet = +c.dataset.per; if(state.cols > state.perSheet) state.cols = state.perSheet; }
+  else if(c.dataset.col){ state.cols = Math.min(+c.dataset.col, state.perSheet); }
+  else if(c.dataset.th){ var p = c.dataset.th.split('|'); state.c1 = p[0]; state.c2 = p[1]; }
+  save(); syncPanel(); render();
+});
+
+/* edición directa sobre el ticket */
+document.getElementById('stage').addEventListener('input', function(e){
+  var el = e.target.closest('[data-f]');
+  if(!el) return;
+  var f = el.dataset.f, i = el.dataset.i, v = el.innerText;
+  if(f === 'prize'){
+    var arr = lines(state.prizes);
+    arr[+i] = v.replace(/^\s*[•\-\*]\s*/, '').trim();
+    state.prizes = arr.join('\n');
+  }else if(f === 'infoText'){ state.info[+i].text = v.trim(); }
+  else if(f === 'stubField'){
+    var sf = lines(state.stubFields);
+    sf[+i] = v.replace(/:\s*$/, '').trim();
+    state.stubFields = sf.join('\n');
+  }
+  else if(f === 'orgName' || f === 'stubTitle'){ state[f] = v.replace(/\n{2,}/g, '\n').replace(/\s+$/, ''); }
+  else { state[f] = v.replace(/\n/g, ' ').trim(); }
+  save(); syncPanel();
+  if(f === 'infoText') renderInfoEditor();
+});
+document.getElementById('stage').addEventListener('blur', function(e){
+  if(e.target.closest && e.target.closest('[data-f]')) render();
+}, true);
+
+/* pestañas y navegación */
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    view = b.dataset.view;
+    render();
+  });
+});
+document.getElementById('btnPrev').addEventListener('click', function(){
+  if(view === 'ticket'){ if(idx > 0) idx--; } else { if(page > 0) page--; }
+  render();
+});
+document.getElementById('btnNext').addEventListener('click', function(){
+  var L = layout();
+  if(view === 'ticket'){ if(idx < state.qty - 1) idx++; }
+  else { if(page < Math.ceil(state.qty / L.per) - 1) page++; }
+  render();
+});
+
+/* ---------- impresión ---------- */
+function setPageSize(L){
+  var old = document.getElementById('pageRule');
+  if(old) old.remove();
+  var st = document.createElement('style');
+  st.id = 'pageRule';
+  st.textContent = '@media print{@page{size:' + L.w + 'mm ' + L.h + 'mm;margin:0}}';
+  document.head.appendChild(st);
+}
+function printRange(from, count){
+  var L = layout();
+  setPageSize(L);
+  var html = '';
+  for(var i = from; i < from + count; i += L.per){
+    html += buildSheet(i, Math.min(L.per, from + count - i), L, false);
+  }
+  document.getElementById('printRoot').innerHTML = html;
+  window.print();
+}
+document.getElementById('btnPrintAll').addEventListener('click', function(){ printRange(0, state.qty); });
+document.getElementById('btnPrintSheet').addEventListener('click', function(){
+  var L = layout();
+  var from = (view === 'sheet' ? page : Math.floor(idx / L.per)) * L.per;
+  printRange(from, Math.min(L.per, state.qty - from));
+});
+document.getElementById('btnPrintOne').addEventListener('click', function(){ printRange(idx, 1); });
+window.addEventListener('afterprint', function(){ document.getElementById('printRoot').innerHTML = ''; });
+
+/* ---------- guardar / cargar / reset ---------- */
+document.getElementById('btnExport').addEventListener('click', function(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'diseno-rifa.json';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+});
+document.getElementById('btnImport').addEventListener('click', function(){ document.getElementById('fileImport').click(); });
+document.getElementById('fileImport').addEventListener('change', function(e){
+  var f = e.target.files[0];
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try{
+      var o = JSON.parse(r.result);
+      for(var k in DEFAULTS) if(o[k] !== undefined) state[k] = o[k];
+      save(); renderInfoEditor(); syncPanel(); render();
+    }catch(err){ alert('El archivo no es un diseño válido.'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+});
+document.getElementById('btnReset').addEventListener('click', function(){
+  if(!confirm('¿Restablecer todos los campos al diseño original?')) return;
+  state = JSON.parse(JSON.stringify(DEFAULTS));
+  idx = 0; page = 0;
+  save(); renderInfoEditor(); syncPanel(); render();
+});
+
+window.addEventListener('resize', function(){ render(); });
+
+/* Dentro de un iframe el diálogo de impresión puede estar bloqueado. */
+try{
+  if(window.self !== window.top){
+    document.getElementById('frameTip').style.display = 'flex';
+    document.getElementById('openTab').href = location.href;
+  }
+}catch(e){
+  document.getElementById('frameTip').style.display = 'flex';
+}
+
+render();
+</script>
+</body>
+</html>
