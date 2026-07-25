@@ -115,137 +115,122 @@ details.sec[open]>summary::after{content:'\2212'}
 .fit-inner{transform-origin:top center}
 
 /* ===================== TICKET =====================
-   Boleto de tómbola: papel de seguridad, doble filete, perforado en la
-   línea de corte y numerador tipográfico. El talón queda a la izquierda. */
+   Entrada de evento: papel limpio, una franja de tinta en el talón, el premio
+   como protagonista tipográfico y los datos en columnas que llenan el ancho. */
 .ticket{
   width:640px;height:360px;position:relative;flex:none;overflow:hidden;
   background:var(--paper);color:var(--ink);font-family:var(--font-body);
-  display:grid;grid-template-columns:var(--stubw) 1fr;--stubw:19%;
-  border:2px solid var(--c1);border-radius:3px}
+  display:grid;grid-template-columns:var(--stubw) 1fr;--stubw:21%;
+  border:1.5px solid var(--c1-45);border-radius:3px}
 .ticket.no-stub{grid-template-columns:1fr}
 .ticket.cream{--paper:#fdfaf3}
-
-/* trama de seguridad + filete interior */
-.ticket::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none}
-.ticket::after{content:'';position:absolute;inset:3px;z-index:3;pointer-events:none;
-  border:1px solid var(--c1-20);border-radius:2px}
-.st-classic::before,.st-fiesta::before{
-  background-image:
-    repeating-linear-gradient(45deg,var(--c1-07) 0 1px,transparent 1px 8px),
-    repeating-linear-gradient(-45deg,var(--c1-07) 0 1px,transparent 1px 8px)}
-.st-fiesta::before{background-image:
-    radial-gradient(circle at 18% 22%,var(--c2-25) 0 3px,transparent 3px),
-    radial-gradient(circle at 74% 12%,var(--c1-25) 0 2.5px,transparent 2.5px),
-    radial-gradient(circle at 88% 62%,var(--c2-25) 0 2px,transparent 2px),
-    radial-gradient(circle at 32% 82%,var(--c1-25) 0 3px,transparent 3px),
-    radial-gradient(circle at 58% 46%,var(--c2-25) 0 2px,transparent 2px),
-    repeating-linear-gradient(45deg,var(--c1-07) 0 1px,transparent 1px 8px)}
-.st-modern::after{border:none}
-.st-fiesta{border-radius:12px}
-.st-fiesta::after{border-radius:10px;border-style:dashed}
+.st-fiesta{border-radius:14px}
 
 /* --- talón --- */
-.t-stub{position:relative;z-index:1;padding:12px 8px 9px;display:flex;flex-direction:column;
-  align-items:center;gap:5px;text-align:center;background:var(--c1-07)}
+.t-stub{position:relative;z-index:1;padding:12px 10px 11px 14px;display:flex;
+  flex-direction:column;align-items:flex-start;text-align:left;background:var(--c1-07)}
+.t-stub::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--c1)}
 .st-modern .t-stub{background:var(--c1);color:#fff}
-.t-perf{position:absolute;top:0;right:-3px;width:6px;height:100%;z-index:2;
-  background-image:radial-gradient(circle at 3px 4px,var(--c1-45) 0 1.6px,transparent 1.7px);
-  background-size:6px 9px}
-.st-modern .t-perf{background-image:radial-gradient(circle at 3px 4px,#fff 0 1.6px,transparent 1.7px)}
-.t-notch{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--paper);
-  border:2px solid var(--c1);z-index:4}
-.t-notch{left:calc(var(--stubw) - 8px)}
-.t-notch.top{top:-8px}
-.t-notch.bot{bottom:-8px}
-.stub-brand{font-family:var(--font-cond);font-weight:700;font-size:12px;line-height:1.15;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--c1-75)}
-.st-modern .stub-brand{color:#fff}
-.stub-numwrap{display:flex;flex-direction:column;align-items:center;gap:0;margin:auto 0;
-  padding:4px 9px 3px;border:1px dashed var(--c1-35);border-radius:3px;background:var(--paper);max-width:100%}
-.stub-numlbl{font-family:var(--font-cond);font-size:8px;font-weight:600;letter-spacing:.22em;
+.st-modern .t-stub::before{display:none}
+.st-fiesta .t-stub::before{width:0}
+.t-perf{position:absolute;top:0;right:-2px;width:5px;height:100%;z-index:2;
+  background-image:radial-gradient(circle at 2.5px 4px,var(--c1-45) 0 1.5px,transparent 1.6px);
+  background-size:5px 9px}
+.st-modern .t-perf{background-image:radial-gradient(circle at 2.5px 4px,#fff 0 1.5px,transparent 1.6px)}
+.t-notch{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--paper);
+  border:1.5px solid var(--c1-45);z-index:4;left:calc(var(--stubw) - 7px)}
+.t-notch.top{top:-7px}
+.t-notch.bot{bottom:-7px}
+.stub-brand{font-family:var(--font-cond);font-weight:700;font-size:11px;line-height:1.2;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--c1-75)}
+.st-modern .stub-brand{color:rgba(255,255,255,.85)}
+.stub-numwrap{margin:9px 0 auto;display:flex;flex-direction:column;gap:1px}
+.stub-numlbl{font-family:var(--font-cond);font-size:8.5px;font-weight:600;letter-spacing:.24em;
   text-transform:uppercase;color:var(--c1-60)}
-.st-modern .stub-numwrap{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5)}
-.st-modern .stub-numlbl{color:rgba(255,255,255,.85)}
-.stub-num{font-family:var(--font-cond);font-weight:800;font-size:25px;line-height:1.05;
-  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.st-modern .stub-numlbl{color:rgba(255,255,255,.8)}
+.stub-num{font-family:var(--font-cond);font-weight:800;font-size:32px;line-height:.95;
+  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .st-modern .stub-num{color:#fff}
-.stub-fields{width:100%;display:flex;flex-direction:column;gap:5px;margin-top:auto}
-.stub-field{text-align:left;width:100%}
+.stub-fields{width:100%;display:flex;flex-direction:column;gap:11px}
+.stub-field{width:100%}
 .stub-field span{display:block;font-family:var(--font-cond);font-size:8.5px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--c1-60)}
+  letter-spacing:.16em;text-transform:uppercase;color:var(--c1-60)}
 .st-modern .stub-field span{color:rgba(255,255,255,.8)}
-.stub-field i{display:block;height:15px;border-bottom:1px solid var(--c1-35)}
-.st-modern .stub-field i{border-bottom-color:rgba(255,255,255,.45)}
-.stub-foot{margin-top:5px;font-family:var(--font-cond);font-size:7px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--c1-50)}
+.stub-field i{display:block;height:16px;border-bottom:1px solid var(--c1-35)}
+.st-modern .stub-field i{border-bottom-color:rgba(255,255,255,.5)}
+.stub-foot{margin-top:8px;font-family:var(--font-cond);font-size:7.5px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--c1-50)}
 .st-modern .stub-foot{color:rgba(255,255,255,.7)}
 
 /* --- cuerpo --- */
-.t-body{position:relative;z-index:1;padding:14px 16px 11px;display:grid;gap:6px;min-width:0}
-.lay-tall .t-body{grid-template-columns:1fr auto;
-  grid-template-rows:auto auto 1fr auto auto auto;
-  grid-template-areas:"head seal" "band band" "prize prize" "data data" "foot foot" "note note"}
-.lay-wide .t-body{grid-template-columns:1.02fr 1fr;column-gap:14px;
-  grid-template-rows:auto auto 1fr auto;
-  grid-template-areas:"head seal" "band data" "prize data" "foot note"}
+.t-body{position:relative;z-index:1;padding:14px 17px 11px;display:grid;min-width:0}
+.lay-tall .t-body{grid-template-columns:1fr auto;grid-template-rows:repeat(5,auto);
+  align-content:space-between;row-gap:4px;
+  grid-template-areas:"head seal" "award award" "data data" "foot foot" "note note"}
+.lay-wide .t-body{grid-template-columns:1.15fr 1fr;column-gap:16px;
+  grid-template-rows:auto 1fr auto auto;
+  grid-template-areas:"head seal" "award data" "foot data" "note note"}
 
-.t-head{grid-area:head;min-width:0;padding-right:6px}
-.t-eyebrow{display:block;font-family:var(--font-script);font-size:28px;line-height:.88;
+.t-head{grid-area:head;min-width:0;padding-right:8px;padding-bottom:7px;
+  border-bottom:2px solid var(--c1);box-shadow:0 3px 0 -1px var(--c1-25)}
+.lay-tall .t-head{grid-column:1 / -1;padding-right:92px}
+.t-eyebrow{display:block;font-family:var(--font-script);font-size:26px;line-height:.86;
   color:var(--c2);margin-left:2px}
-.t-display{display:block;font-family:var(--font-display);font-size:52px;line-height:.92;
-  letter-spacing:.005em;color:var(--c1)}
-.st-modern .t-display{font-family:var(--font-cond);font-weight:800;font-size:58px;letter-spacing:-.01em}
-.t-kicker{display:flex;align-items:center;gap:7px;margin-top:2px;font-family:var(--font-cond);
-  font-size:14px;font-weight:600;letter-spacing:.36em;text-transform:uppercase;color:var(--c1-75)}
-.t-kicker::after{content:'';flex:1;height:1px;background:var(--c1-25)}
+.t-display{display:block;font-family:var(--font-display);font-size:50px;line-height:.94;
+  color:var(--c1)}
+.st-modern .t-display{font-family:var(--font-cond);font-weight:800;letter-spacing:-.005em}
+.t-kicker{display:block;margin-top:3px;font-family:var(--font-cond);font-size:12.5px;
+  font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--c1-75)}
 
-.t-seal{grid-area:seal;align-self:start;justify-self:end;width:76px;height:76px;border-radius:50%;
+.t-seal{grid-area:seal;align-self:start;justify-self:end;width:72px;height:72px;border-radius:50%;
   background:var(--c1);color:#fff;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;text-align:center;padding:3px;
-  box-shadow:inset 0 0 0 2px var(--paper),inset 0 0 0 3.5px rgba(255,255,255,.55)}
-.st-fiesta .t-seal{background:var(--c2)}
-.seal-lbl{font-family:var(--font-cond);font-size:9px;font-weight:600;letter-spacing:.16em;
-  text-transform:uppercase;opacity:.9}
-.seal-price{font-family:var(--font-cond);font-weight:800;font-size:26px;line-height:1}
+  justify-content:center;text-align:center;padding:3px;z-index:2;
+  box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--c1-45)}
+.lay-tall .t-seal{margin-top:2px}
+.st-fiesta .t-seal{background:var(--c2);box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--c2-25)}
+.seal-lbl{font-family:var(--font-cond);font-size:8.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.92}
+.seal-price{font-family:var(--font-cond);font-weight:800;line-height:1}
 
-.t-band{grid-area:band;background:var(--c1);color:var(--paper);text-align:center;
-  font-family:var(--font-display);font-size:17px;letter-spacing:.2em;padding:4px 24px;
-  clip-path:polygon(0 0,100% 0,calc(100% - 11px) 50%,100% 100%,0 100%,11px 50%)}
-.st-modern .t-band{clip-path:none;font-family:var(--font-cond);font-weight:700;text-align:left;padding-left:12px}
-.st-fiesta .t-band{background:var(--c2)}
+/* premio: etiqueta pequeña y el texto en grande, sin caja */
+.t-award{grid-area:award;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;gap:4px;padding:5px 0;min-width:0}
+.award-lbl{font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--c1);display:flex;align-items:center;gap:9px}
+.award-lbl::before,.award-lbl::after{content:'';width:22px;height:1px;background:var(--c1-35)}
+.t-prize{font-family:var(--font-cond);font-size:28px;font-weight:700;line-height:1.08;
+  color:var(--ink)}
+.t-prize+.t-prize{font-size:21px;color:var(--ink-80)}
+.t-emojis{font-size:24px;line-height:1;margin-top:2px}
 
-.t-prizes{grid-area:prize;display:flex;flex-direction:column;justify-content:center;gap:3px;
-  text-align:center;min-width:0;padding:7px 10px;border:1px dashed var(--c1-25);border-radius:3px;
-  background:var(--c1-07)}
-.t-prize{font-size:16px;font-weight:600;line-height:1.25;color:var(--ink)}
-.t-prize::before{content:'\2726';color:var(--c2);margin-right:5px;font-size:11px;vertical-align:1px}
-.t-emojis{font-size:30px;line-height:1;margin-top:3px}
+/* datos en columnas separadas por filetes */
+.t-data{grid-area:data;display:flex;border-top:1px solid var(--c1-25);
+  border-bottom:1px solid var(--c1-25);min-width:0}
+.lay-wide .t-data{flex-direction:column;border:none;justify-content:center;
+  border-left:1px solid var(--c1-25);padding-left:14px;gap:9px}
+.t-chip{flex:auto;min-width:0;padding:6px 9px;display:flex;align-items:center;justify-content:center;
+  gap:6px;text-align:center}
+.lay-wide .t-chip{justify-content:flex-start;text-align:left;padding:0}
+.t-chip+.t-chip{border-left:1px solid var(--c1-20)}
+.lay-wide .t-chip+.t-chip{border-left:none}
+.t-chip i{font-style:normal;font-size:12px;line-height:1;opacity:.9;flex:none}
+.t-chip span{font-family:var(--font-cond);font-size:12.5px;font-weight:600;line-height:1.15;
+  color:var(--ink-80)}
 
-.t-data{grid-area:data;display:flex;flex-wrap:wrap;gap:4px;align-content:center;min-width:0}
-.lay-tall .t-data{justify-content:center}
-.lay-wide .t-data{flex-direction:column;justify-content:center}
-.t-chip{display:flex;align-items:center;gap:5px;border:1px solid var(--c1-25);border-radius:2px;
-  padding:3px 9px;font-family:var(--font-cond);font-size:13.5px;font-weight:600;color:var(--ink-80)}
-.st-modern .t-prizes{border:none;border-radius:0}
-.st-fiesta .t-prizes{border-radius:10px}
-.st-modern .t-chip{border:none;border-left:3px solid var(--c1);border-radius:0;padding-left:7px}
-.st-fiesta .t-chip{border-radius:20px}
-.t-chip i{font-style:normal;font-size:11px;line-height:1}
-
-.t-foot{grid-area:foot;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
-  border-top:1px solid var(--c1-20);padding-top:5px;min-width:0}
+.t-foot{grid-area:foot;display:flex;align-items:flex-end;justify-content:space-between;
+  gap:10px;padding-top:7px;min-width:0}
+.lay-wide .t-foot{align-items:center}
 .t-org{min-width:0}
 .t-org-lbl{display:block;font-family:var(--font-cond);font-size:9px;font-weight:600;
-  letter-spacing:.18em;text-transform:uppercase;color:var(--c1-60)}
-.t-org-name{display:block;font-size:17px;font-weight:700;line-height:1.15;color:var(--ink)}
+  letter-spacing:.2em;text-transform:uppercase;color:var(--c1-60)}
+.t-org-name{display:block;font-size:16px;font-weight:700;line-height:1.15;color:var(--ink)}
 .t-numbox{text-align:right;flex:none}
-.t-num{display:block;font-family:var(--font-cond);font-weight:800;font-size:36px;line-height:.92;
-  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.t-range{display:block;font-family:var(--font-cond);font-size:9px;font-weight:600;
-  letter-spacing:.1em;color:var(--c1-55)}
-.t-note{grid-area:note;font-size:9px;line-height:1.3;color:var(--ink-55);text-align:center;
-  align-self:end}
-.lay-wide .t-note{text-align:right}
+.t-num{display:block;font-family:var(--font-cond);font-weight:800;font-size:34px;line-height:.9;
+  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.t-range{display:block;font-family:var(--font-cond);font-size:8.5px;font-weight:600;
+  letter-spacing:.12em;color:var(--c1-55)}
+.t-note{grid-area:note;font-size:8.5px;line-height:1.3;color:var(--ink-55);text-align:center;
+  align-self:end;padding-top:5px}
 
 /* Edición directa sobre el ticket */
 .ticket [contenteditable]{outline:none;border-radius:2px;transition:background .12s,box-shadow .12s}
@@ -478,7 +463,7 @@ details.sec[open]>summary::after{content:'\2212'}
 
 var MM = 96 / 25.4;
 var PAPERS = { a4:[210,297], letter:[215.9,279.4], legal:[215.9,355.6], a5:[148,210] };
-var STORE = 'rifaGen.v3';
+var STORE = 'rifaGen.v4';
 
 var DEFAULTS = {
   qty:100, start:1, digits:3, prefix:'', suffix:'', showRange:true,
@@ -486,8 +471,8 @@ var DEFAULTS = {
   style:'classic', cream:false,
   prizeBar:'PREMIO', prizes:'Premio Sorpresa',
   orgLabel:'Organiza', orgName:'Amistades\nEloy Alfaro',
-  priceLabel:'Valor:', price:'$0.50', showSeal:true,
-  emojis:'🎁🎁🎁',
+  priceLabel:'Valor', price:'$0.50', showSeal:true,
+  emojis:'',
   info:[
     {icon:'📅', text:'Jueves, 09 de Julio del 2026'},
     {icon:'🕐', text:'20h00 (8PM)'},
@@ -605,7 +590,7 @@ function buildTicket(i, editable, dims){
     var ts = tl <= 6 ? 52 : Math.max(24, Math.round(52 * 6 / tl));
     h += '<span class="t-display" style="font-size:' + ts + 'px"' + e + ed('titleMain') + '>' + esc(state.titleMain) + '</span>';
   }
-  if(state.titleSub) h += '<span class="t-kicker"><span' + e + ed('titleSub') + '>' + esc(state.titleSub) + '</span></span>';
+  if(state.titleSub) h += '<span class="t-kicker"' + e + ed('titleSub') + '>' + esc(state.titleSub) + '</span>';
   h += '</div>';
 
   if(state.showSeal){
@@ -615,9 +600,8 @@ function buildTicket(i, editable, dims){
     h += '<span class="seal-price" style="font-size:' + ps + 'px"' + e + ed('price') + '>' + esc(state.price) + '</span></div>';
   }
 
-  if(state.prizeBar) h += '<div class="t-band"' + e + ed('prizeBar') + '>' + esc(state.prizeBar) + '</div>';
-
-  h += '<div class="t-prizes">';
+  h += '<div class="t-award">';
+  if(state.prizeBar) h += '<span class="award-lbl"><span' + e + ed('prizeBar') + '>' + esc(state.prizeBar) + '</span></span>';
   lines(state.prizes).forEach(function(p, k){
     h += '<div class="t-prize"><span' + e + ed('prize', k) + '>' + esc(p) + '</span></div>';
   });
