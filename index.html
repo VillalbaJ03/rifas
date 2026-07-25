@@ -40,10 +40,9 @@ body{font-family:var(--font-body);background:var(--ui-bg);color:var(--ui-text);m
 
 /* ===================== LAYOUT UI ===================== */
 .app{display:grid;grid-template-columns:340px 1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto;align-items:start}
-@media (max-width:980px){.app{grid-template-columns:1fr}}
+.panel,.workspace{min-width:0}
 
 .panel{background:var(--ui-card);border-radius:12px;box-shadow:0 2px 14px var(--ui-shadow);padding:16px;position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto}
-@media (max-width:980px){.panel{position:static;max-height:none}}
 .panel h1{font-size:16px;font-weight:800;letter-spacing:.3px;margin-bottom:2px}
 .panel .sub{font-size:11.5px;color:var(--ui-muted);margin-bottom:14px}
 
@@ -111,8 +110,41 @@ details.sec[open]>summary::after{content:'\2212'}
 .stage{background:var(--ui-stage);border-radius:10px;padding:22px;display:flex;justify-content:center;align-items:flex-start;overflow:auto}
 .edit-tip{font-size:11.5px;color:var(--ui-muted);margin-bottom:9px;display:flex;align-items:center;gap:6px}
 .edit-tip b{color:var(--c1)}
-.fit{display:flex;justify-content:center}
-.fit-inner{transform-origin:top center}
+/* El contenedor mide ya el tamaño escalado, así que el contenido se ancla
+   arriba a la izquierda; centrarlo aquí lo desplazaría antes de escalar. */
+.fit{display:flex;justify-content:flex-start}
+.fit-inner{transform-origin:top left}
+
+/* ===================== MÓVIL =====================
+   La vista previa va primero, el panel debajo y las acciones de impresión
+   quedan siempre a mano en una barra inferior. */
+.mobile-bar{display:none}
+@media (max-width:980px){
+  .app{grid-template-columns:1fr;gap:12px;padding:12px 12px 84px}
+  .panel{position:static;max-height:none;padding:14px}
+  .workspace{order:-1;min-height:0;padding:12px 13px}
+  .stage{padding:12px}
+  .ws-head{margin-bottom:10px}
+  .nav .count{min-width:96px;font-size:12.5px}
+  .actions{display:none}
+  .mobile-bar{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;position:fixed;left:0;right:0;bottom:0;
+    z-index:50;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:var(--ui-card);border-top:1px solid var(--ui-line);
+    box-shadow:0 -3px 14px var(--ui-shadow)}
+  .mobile-bar .btn{padding:12px 10px;font-size:13.5px}
+  /* iOS amplía la página si el campo mide menos de 16px */
+  .field input[type=text],.field input[type=number],.field textarea,.field select,
+  .info-item input{font-size:16px!important}
+  .chip{padding:8px 13px;font-size:12.5px}
+  .check input{width:20px;height:20px}
+}
+@media (max-width:520px){
+  .row.c3{grid-template-columns:1fr 1fr}
+  .ws-head{flex-direction:column;align-items:stretch;gap:8px}
+  .nav{justify-content:space-between}
+  .tabs{justify-content:center}
+}
 
 /* ===================== TICKET =====================
    Entrada de evento: papel limpio, una franja de tinta en el talón, el premio
@@ -456,6 +488,11 @@ details.sec[open]>summary::after{content:'\2212'}
   </main>
 </div>
 
+<div class="mobile-bar noprint">
+  <button class="btn btn-primary" id="btnPrintSheetM">&#128424; Imprimir hoja</button>
+  <button class="btn btn-danger" id="btnPrintAllM">&#128424; Imprimir todo</button>
+</div>
+
 <div id="printRoot"></div>
 
 <script>
@@ -736,14 +773,24 @@ function render(){
     'Tama&ntilde;o real del ticket: ' + (L.tw * L.scale / MM).toFixed(0) + ' &times; ' + (L.th * L.scale / MM).toFixed(0) + ' mm';
 }
 
+function stageSpace(stage){
+  var cs = getComputedStyle(stage);
+  return stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+}
+
 function fitStage(w, h){
   var stage = document.getElementById('stage');
   var inner = stage.querySelector('.fit-inner');
   if(!inner) return;
-  var k = Math.min(1, (stage.clientWidth - 44) / w);
+  var k = Math.min(1, stageSpace(stage) / w);
+  inner.style.transformOrigin = 'top left';
   inner.style.transform = 'scale(' + k + ')';
   inner.style.width = w + 'px';
   inner.style.height = (h * k) + 'px';
+  var fit = inner.parentNode;
+  fit.style.width = (w * k) + 'px';
+  fit.style.height = (h * k) + 'px';
+  fit.style.overflow = 'hidden';
 }
 
 function fitSheet(L){
@@ -752,7 +799,7 @@ function fitSheet(L){
   var sc = stage.querySelector('.sheet-scale');
   if(!sc) return;
   var pxW = L.w * MM, pxH = L.h * MM;
-  var k = Math.min(1, (stage.clientWidth - 44) / pxW, (window.innerHeight * 0.72) / pxH);
+  var k = Math.min(1, stageSpace(stage) / pxW, (window.innerHeight * 0.72) / pxH);
   sc.style.transform = 'scale(' + k + ')';
   wrap.style.width = (pxW * k) + 'px';
   wrap.style.height = (pxH * k) + 'px';
@@ -931,12 +978,16 @@ function printRange(from, count){
   document.getElementById('printRoot').innerHTML = html;
   window.print();
 }
-document.getElementById('btnPrintAll').addEventListener('click', function(){ printRange(0, state.qty); });
-document.getElementById('btnPrintSheet').addEventListener('click', function(){
+function printAll(){ printRange(0, state.qty); }
+function printSheet(){
   var L = layout();
   var from = (view === 'sheet' ? page : Math.floor(idx / L.per)) * L.per;
   printRange(from, Math.min(L.per, state.qty - from));
-});
+}
+document.getElementById('btnPrintAll').addEventListener('click', printAll);
+document.getElementById('btnPrintAllM').addEventListener('click', printAll);
+document.getElementById('btnPrintSheet').addEventListener('click', printSheet);
+document.getElementById('btnPrintSheetM').addEventListener('click', printSheet);
 document.getElementById('btnPrintOne').addEventListener('click', function(){ printRange(idx, 1); });
 window.addEventListener('afterprint', function(){ document.getElementById('printRoot').innerHTML = ''; });
 
