@@ -11,6 +11,14 @@ No necesita instalación ni conexión: es un único archivo HTML.
 escribiendo directamente encima del ticket: títulos, premios, organizador, precio,
 fecha, hora, lugar, nota final, textos del talón recortable y colores.
 
+**Tres estilos de ticket.** *Clásico* (boleto de tómbola con trama de seguridad, doble
+filete y banda de premio en cinta), *Moderno* (bloques de color, sin ornamento) y
+*Festivo*. Cada uno con seis paletas de tinta y opción de papel color crema.
+
+**Se adapta al espacio.** El ticket cambia de composición según la proporción que
+resulte de la rejilla elegida, y si el contenido crece —más premios, más datos— la
+densidad se ajusta sola para que nada quede recortado.
+
 **Numeración automática.** Cantidad de tickets, número inicial, cantidad de dígitos y
 prefijo o sufijo opcionales.
 

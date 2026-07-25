@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google" content="notranslate">
 <title>Generador de Tickets de Rifa</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Dancing+Script:wght@700&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Yellowtail&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --c1:#1a7a8a; --c2:#d32f2f;
-  --font-display:'Oswald','Arial Narrow','Franklin Gothic Medium',Impact,sans-serif;
-  --font-script:'Dancing Script','Segoe Script','Brush Script MT',cursive;
-  --font-body:'Montserrat','Segoe UI',system-ui,-apple-system,sans-serif;
+  --c1:#0f6b73; --c2:#c1272d;
+  --font-display:'Alfa Slab One',Rockwell,'Roboto Slab',Georgia,serif;
+  --font-script:'Yellowtail','Segoe Script','Brush Script MT',cursive;
+  --font-cond:'Barlow Condensed','Arial Narrow','Franklin Gothic Medium',sans-serif;
+  --font-body:'Barlow','Segoe UI',system-ui,-apple-system,sans-serif;
   --ui-bg:#eef1f6; --ui-card:#fff; --ui-text:#1f2933; --ui-muted:#6b7280; --ui-line:#dde3ea;
   --ui-field:#fff; --ui-stage:#f4f6f9; --ui-chip:#eef1f6; --ui-shadow:rgba(16,24,40,.08);
   color-scheme:light;
@@ -113,55 +114,143 @@ details.sec[open]>summary::after{content:'\2212'}
 .fit{display:flex;justify-content:center}
 .fit-inner{transform-origin:top center}
 
-/* ===================== TICKET ===================== */
+/* ===================== TICKET =====================
+   Boleto de tómbola: papel de seguridad, doble filete, perforado en la
+   línea de corte y numerador tipográfico. El talón queda a la izquierda. */
 .ticket{
-  width:640px;height:220px;background:#fff;border:2px solid var(--c1);border-radius:4px;
-  display:grid;grid-template-columns:23.5% 1fr 1fr;overflow:hidden;position:relative;
-  font-family:var(--font-body);color:#222;flex:none}
-.ticket.tall .t-left,.ticket.tall .t-right,.ticket.tall .t-stub{padding-top:16px;padding-bottom:14px}
-.ticket.no-stub{grid-template-columns:1fr 1fr}
+  width:640px;height:360px;position:relative;flex:none;overflow:hidden;
+  background:var(--paper);color:var(--ink);font-family:var(--font-body);
+  display:grid;grid-template-columns:var(--stubw) 1fr;--stubw:19%;
+  border:2px solid var(--c1);border-radius:3px}
+.ticket.no-stub{grid-template-columns:1fr}
+.ticket.cream{--paper:#fdfaf3}
 
-.t-stub{padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;border-right:2px dashed #999;background:var(--stub-bg,#f7fbfc);position:relative}
-.t-stub::after{content:'\2702';position:absolute;top:50%;right:-9px;transform:translateY(-50%);font-size:14px;color:#999}
-.t-stub-title{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--c1);text-align:center;letter-spacing:1px;line-height:1.15;text-transform:uppercase}
-.t-stub-num{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--c2);letter-spacing:1px;text-align:center;margin:2px 0}
-.t-stub-fields{width:100%;display:flex;flex-direction:column;gap:2px}
-.t-stub-field{width:100%}
-.t-stub-label{font-size:7.5px;font-weight:800;color:var(--c1);text-transform:uppercase;letter-spacing:.5px}
-.t-stub-line{width:100%;border-bottom:1px solid #666;height:15px;display:block}
+/* trama de seguridad + filete interior */
+.ticket::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none}
+.ticket::after{content:'';position:absolute;inset:3px;z-index:3;pointer-events:none;
+  border:1px solid var(--c1-20);border-radius:2px}
+.st-classic::before,.st-fiesta::before{
+  background-image:
+    repeating-linear-gradient(45deg,var(--c1-07) 0 1px,transparent 1px 8px),
+    repeating-linear-gradient(-45deg,var(--c1-07) 0 1px,transparent 1px 8px)}
+.st-fiesta::before{background-image:
+    radial-gradient(circle at 18% 22%,var(--c2-25) 0 3px,transparent 3px),
+    radial-gradient(circle at 74% 12%,var(--c1-25) 0 2.5px,transparent 2.5px),
+    radial-gradient(circle at 88% 62%,var(--c2-25) 0 2px,transparent 2px),
+    radial-gradient(circle at 32% 82%,var(--c1-25) 0 3px,transparent 3px),
+    radial-gradient(circle at 58% 46%,var(--c2-25) 0 2px,transparent 2px),
+    repeating-linear-gradient(45deg,var(--c1-07) 0 1px,transparent 1px 8px)}
+.st-modern::after{border:none}
+.st-fiesta{border-radius:12px}
+.st-fiesta::after{border-radius:10px;border-style:dashed}
 
-.t-left{padding:10px 14px 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
-.t-deco-frame{border:3px solid var(--c1);border-radius:10px;padding:6px 18px 4px;text-align:center;position:relative;background:#fff}
-.t-deco-frame.plain{border:none;padding:2px 0 0}
-.t-deco-frame::before{content:"\2665  \2605  \2665";position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#fff;padding:0 6px;color:var(--c1);font-size:10px;letter-spacing:3px}
-.t-deco-frame.plain::before{display:none}
-.t-gran{font-family:var(--font-script);color:var(--c1);font-size:18px;line-height:1.1;font-weight:700}
-.t-rifa{font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--c1);line-height:1;letter-spacing:4px}
-.t-solidaria{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--c1);line-height:1.1;letter-spacing:3px}
-.t-premio-bar{background:var(--c1);color:#fff;padding:3px 20px;text-align:center;font-weight:800;font-size:13px;letter-spacing:2px;width:100%;margin-top:6px}
-.t-prizes{margin-top:4px;text-align:center}
-.t-prize{font-size:12px;font-weight:700;color:#222;line-height:1.3}
-.t-bottom{text-align:center;width:100%}
-.t-number{font-size:20px;font-weight:800;color:var(--c2);letter-spacing:2px;font-family:var(--font-display)}
-.t-range{font-size:9px;font-weight:600;color:#777;margin-top:1px}
+/* --- talón --- */
+.t-stub{position:relative;z-index:1;padding:12px 8px 9px;display:flex;flex-direction:column;
+  align-items:center;gap:5px;text-align:center;background:var(--c1-07)}
+.st-modern .t-stub{background:var(--c1);color:#fff}
+.t-perf{position:absolute;top:0;right:-3px;width:6px;height:100%;z-index:2;
+  background-image:radial-gradient(circle at 3px 4px,var(--c1-45) 0 1.6px,transparent 1.7px);
+  background-size:6px 9px}
+.st-modern .t-perf{background-image:radial-gradient(circle at 3px 4px,#fff 0 1.6px,transparent 1.7px)}
+.t-notch{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--paper);
+  border:2px solid var(--c1);z-index:4}
+.t-notch{left:calc(var(--stubw) - 8px)}
+.t-notch.top{top:-8px}
+.t-notch.bot{bottom:-8px}
+.stub-brand{font-family:var(--font-cond);font-weight:700;font-size:12px;line-height:1.15;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--c1-75)}
+.st-modern .stub-brand{color:#fff}
+.stub-numwrap{display:flex;flex-direction:column;align-items:center;gap:0;margin:auto 0;
+  padding:4px 9px 3px;border:1px dashed var(--c1-35);border-radius:3px;background:var(--paper);max-width:100%}
+.stub-numlbl{font-family:var(--font-cond);font-size:8px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--c1-60)}
+.st-modern .stub-numwrap{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5)}
+.st-modern .stub-numlbl{color:rgba(255,255,255,.85)}
+.stub-num{font-family:var(--font-cond);font-weight:800;font-size:25px;line-height:1.05;
+  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.st-modern .stub-num{color:#fff}
+.stub-fields{width:100%;display:flex;flex-direction:column;gap:5px;margin-top:auto}
+.stub-field{text-align:left;width:100%}
+.stub-field span{display:block;font-family:var(--font-cond);font-size:8.5px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--c1-60)}
+.st-modern .stub-field span{color:rgba(255,255,255,.8)}
+.stub-field i{display:block;height:15px;border-bottom:1px solid var(--c1-35)}
+.st-modern .stub-field i{border-bottom-color:rgba(255,255,255,.45)}
+.stub-foot{margin-top:5px;font-family:var(--font-cond);font-size:7px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--c1-50)}
+.st-modern .stub-foot{color:rgba(255,255,255,.7)}
 
-.t-right{padding:10px 12px 8px;display:flex;flex-direction:column;justify-content:space-between}
-.t-org-row{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
-.t-org-text{flex:1;min-width:0}
-.t-org-label{font-size:13px;font-weight:800;color:#222}
-.t-org-name{font-size:16px;font-weight:800;color:var(--c1);line-height:1.2}
-.t-seal{background:var(--c1);color:#fff;border-radius:50%;width:64px;height:64px;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:10px;border:3px solid #c9dfe3;box-shadow:0 1px 4px rgba(0,0,0,.2);text-align:center;padding:2px}
-.t-seal-price{font-size:19px;font-weight:800;line-height:1.1}
-.t-emojis{text-align:center;font-size:28px;line-height:1;margin:4px 0}
-.t-info-boxes{display:flex;flex-direction:column;gap:3px}
-.t-info-box{border:1px solid #bbb;border-radius:3px;padding:2px 6px;font-size:9.5px;font-weight:600;color:#333;display:flex;align-items:center;gap:4px}
-.t-info-icon{font-size:11px;flex:none}
-.t-contact{font-size:8px;color:#555;text-align:center;line-height:1.25;margin-top:2px}
+/* --- cuerpo --- */
+.t-body{position:relative;z-index:1;padding:14px 16px 11px;display:grid;gap:6px;min-width:0}
+.lay-tall .t-body{grid-template-columns:1fr auto;
+  grid-template-rows:auto auto 1fr auto auto auto;
+  grid-template-areas:"head seal" "band band" "prize prize" "data data" "foot foot" "note note"}
+.lay-wide .t-body{grid-template-columns:1.02fr 1fr;column-gap:14px;
+  grid-template-rows:auto auto 1fr auto;
+  grid-template-areas:"head seal" "band data" "prize data" "foot note"}
+
+.t-head{grid-area:head;min-width:0;padding-right:6px}
+.t-eyebrow{display:block;font-family:var(--font-script);font-size:28px;line-height:.88;
+  color:var(--c2);margin-left:2px}
+.t-display{display:block;font-family:var(--font-display);font-size:52px;line-height:.92;
+  letter-spacing:.005em;color:var(--c1)}
+.st-modern .t-display{font-family:var(--font-cond);font-weight:800;font-size:58px;letter-spacing:-.01em}
+.t-kicker{display:flex;align-items:center;gap:7px;margin-top:2px;font-family:var(--font-cond);
+  font-size:14px;font-weight:600;letter-spacing:.36em;text-transform:uppercase;color:var(--c1-75)}
+.t-kicker::after{content:'';flex:1;height:1px;background:var(--c1-25)}
+
+.t-seal{grid-area:seal;align-self:start;justify-self:end;width:76px;height:76px;border-radius:50%;
+  background:var(--c1);color:#fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:3px;
+  box-shadow:inset 0 0 0 2px var(--paper),inset 0 0 0 3.5px rgba(255,255,255,.55)}
+.st-fiesta .t-seal{background:var(--c2)}
+.seal-lbl{font-family:var(--font-cond);font-size:9px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.9}
+.seal-price{font-family:var(--font-cond);font-weight:800;font-size:26px;line-height:1}
+
+.t-band{grid-area:band;background:var(--c1);color:var(--paper);text-align:center;
+  font-family:var(--font-display);font-size:17px;letter-spacing:.2em;padding:4px 24px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 11px) 50%,100% 100%,0 100%,11px 50%)}
+.st-modern .t-band{clip-path:none;font-family:var(--font-cond);font-weight:700;text-align:left;padding-left:12px}
+.st-fiesta .t-band{background:var(--c2)}
+
+.t-prizes{grid-area:prize;display:flex;flex-direction:column;justify-content:center;gap:3px;
+  text-align:center;min-width:0;padding:7px 10px;border:1px dashed var(--c1-25);border-radius:3px;
+  background:var(--c1-07)}
+.t-prize{font-size:16px;font-weight:600;line-height:1.25;color:var(--ink)}
+.t-prize::before{content:'\2726';color:var(--c2);margin-right:5px;font-size:11px;vertical-align:1px}
+.t-emojis{font-size:30px;line-height:1;margin-top:3px}
+
+.t-data{grid-area:data;display:flex;flex-wrap:wrap;gap:4px;align-content:center;min-width:0}
+.lay-tall .t-data{justify-content:center}
+.lay-wide .t-data{flex-direction:column;justify-content:center}
+.t-chip{display:flex;align-items:center;gap:5px;border:1px solid var(--c1-25);border-radius:2px;
+  padding:3px 9px;font-family:var(--font-cond);font-size:13.5px;font-weight:600;color:var(--ink-80)}
+.st-modern .t-prizes{border:none;border-radius:0}
+.st-fiesta .t-prizes{border-radius:10px}
+.st-modern .t-chip{border:none;border-left:3px solid var(--c1);border-radius:0;padding-left:7px}
+.st-fiesta .t-chip{border-radius:20px}
+.t-chip i{font-style:normal;font-size:11px;line-height:1}
+
+.t-foot{grid-area:foot;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+  border-top:1px solid var(--c1-20);padding-top:5px;min-width:0}
+.t-org{min-width:0}
+.t-org-lbl{display:block;font-family:var(--font-cond);font-size:9px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--c1-60)}
+.t-org-name{display:block;font-size:17px;font-weight:700;line-height:1.15;color:var(--ink)}
+.t-numbox{text-align:right;flex:none}
+.t-num{display:block;font-family:var(--font-cond);font-weight:800;font-size:36px;line-height:.92;
+  color:var(--c2);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.t-range{display:block;font-family:var(--font-cond);font-size:9px;font-weight:600;
+  letter-spacing:.1em;color:var(--c1-55)}
+.t-note{grid-area:note;font-size:9px;line-height:1.3;color:var(--ink-55);text-align:center;
+  align-self:end}
+.lay-wide .t-note{text-align:right}
 
 /* Edición directa sobre el ticket */
 .ticket [contenteditable]{outline:none;border-radius:2px;transition:background .12s,box-shadow .12s}
-.ticket [contenteditable]:hover{background:rgba(26,122,138,.09);box-shadow:0 0 0 2px rgba(26,122,138,.12)}
-.ticket [contenteditable]:focus{background:#fff8d6;box-shadow:0 0 0 2px rgba(214,158,0,.55)}
+.ticket [contenteditable]:hover{background:var(--c1-12);box-shadow:0 0 0 2px var(--c1-12)}
+.ticket [contenteditable]:focus{background:#fff6cf;box-shadow:0 0 0 2px rgba(199,146,0,.6)}
 
 /* ===================== HOJAS ===================== */
 .sheet{
@@ -268,7 +357,6 @@ details.sec[open]>summary::after{content:'\2212'}
         <div class="field"><label>Línea superior (cursiva)</label><input type="text" id="titleTop"></div>
         <div class="field"><label>Línea principal</label><input type="text" id="titleMain"></div>
         <div class="field"><label>Línea inferior</label><input type="text" id="titleSub"></div>
-        <label class="check"><input type="checkbox" id="showFrame"> Marco decorativo</label>
       </div>
     </details>
 
@@ -327,17 +415,23 @@ details.sec[open]>summary::after{content:'\2212'}
           <textarea id="stubFields" rows="3"></textarea>
           <div class="hint">Un campo por línea (Nombre, Celular…).</div>
         </div>
+        <div class="field"><label>Pie del talón</label><input type="text" id="stubFoot"></div>
       </div>
     </details>
 
-    <details class="sec">
-      <summary>Colores</summary>
+    <details class="sec" open>
+      <summary>Estilo y colores</summary>
       <div class="sec-body">
+        <div class="field">
+          <label>Estilo del ticket</label>
+          <div class="chips" id="chipsStyle"></div>
+        </div>
         <div class="color-row">
-          <div class="cf"><div class="field"><label>Principal</label><input type="color" id="c1"></div></div>
-          <div class="cf"><div class="field"><label>Números</label><input type="color" id="c2"></div></div>
+          <div class="cf"><div class="field"><label>Tinta principal</label><input type="color" id="c1"></div></div>
+          <div class="cf"><div class="field"><label>Numeración</label><input type="color" id="c2"></div></div>
         </div>
         <div class="chips" id="chipsTheme"></div>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="cream"> Papel color crema</label>
       </div>
     </details>
 
@@ -384,12 +478,12 @@ details.sec[open]>summary::after{content:'\2212'}
 
 var MM = 96 / 25.4;
 var PAPERS = { a4:[210,297], letter:[215.9,279.4], legal:[215.9,355.6], a5:[148,210] };
-var STORE = 'rifaGen.v2';
+var STORE = 'rifaGen.v3';
 
 var DEFAULTS = {
   qty:100, start:1, digits:3, prefix:'', suffix:'', showRange:true,
   titleTop:'Gran', titleMain:'RIFA', titleSub:'SOLIDARIA',
-  showFrame:true,
+  style:'classic', cream:false,
   prizeBar:'PREMIO', prizes:'Premio Sorpresa',
   orgLabel:'Organiza', orgName:'Amistades\nEloy Alfaro',
   priceLabel:'Valor:', price:'$0.50', showSeal:true,
@@ -401,18 +495,25 @@ var DEFAULTS = {
   ],
   note:'El ganador será contactado vía WhatsApp o se le entregará si está presente',
   showStub:true, stubTitle:'Rifa\nSolidaria', stubFields:'Nombre\nCelular',
-  c1:'#1a7a8a', c2:'#d32f2f',
-  paper:'a4', orient:'portrait', margin:8, perSheet:6, cols:2, gap:3, cutLines:false,
+  stubFoot:'Conserve este talón',
+  c1:'#0f6b73', c2:'#c1272d',
+  paper:'a4', orient:'portrait', margin:8, perSheet:10, cols:2, gap:3, cutLines:false,
   tHeight:220, autoFit:true
 };
 
+var STYLES = [
+  {k:'classic', n:'Clásico'},
+  {k:'modern',  n:'Moderno'},
+  {k:'fiesta',  n:'Festivo'}
+];
+
 var THEMES = [
-  {n:'Turquesa', a:'#1a7a8a', b:'#d32f2f'},
-  {n:'Vino',     a:'#8e1d3d', b:'#0b6b4f'},
-  {n:'Azul',     a:'#1c4e9c', b:'#e8590c'},
-  {n:'Verde',    a:'#1f7a44', b:'#c2185b'},
-  {n:'Morado',   a:'#5b2d8e', b:'#d17b00'},
-  {n:'Negro',    a:'#222222', b:'#c62828'}
+  {n:'Laguna',   a:'#0f6b73', b:'#c1272d'},
+  {n:'Granate',  a:'#7d1b32', b:'#0e6b4f'},
+  {n:'Índigo',   a:'#25407e', b:'#d4581f'},
+  {n:'Bosque',   a:'#1d6238', b:'#a8202f'},
+  {n:'Ciruela',  a:'#4d2a6b', b:'#c47000'},
+  {n:'Tinta',    a:'#232a33', b:'#b3202b'}
 ];
 
 var state = load();
@@ -446,6 +547,29 @@ function ed(f, i){ return ' data-f="' + f + '"' + (i===undefined ? '' : ' data-i
 function ticketWidth(){ return state.showStub ? 640 : 490; }
 function ticketHeight(){ return clamp(state.tHeight, 200, 520); }
 
+/* Todos los tickets llevan el mismo contenido, así que basta medir uno:
+   si no cabe en el alto disponible, se reduce la densidad del cuerpo. */
+var bodyZoom = 1;
+function updateBodyZoom(tw, th){
+  bodyZoom = 1;
+  var probe = document.getElementById('fitProbe');
+  if(!probe){
+    probe = document.createElement('div');
+    probe.id = 'fitProbe';
+    probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none';
+    document.body.appendChild(probe);
+  }
+  probe.innerHTML = buildTicket(0, false, {w:tw, h:th, probe:true});
+  var body = probe.querySelector('.t-body');
+  var stub = probe.querySelector('.t-stub');
+  if(!body) return;
+  body.style.height = 'auto';
+  var avail = th - 4;
+  var need = body.scrollHeight;
+  if(stub){ stub.style.height = 'auto'; need = Math.max(need, stub.scrollHeight); }
+  bodyZoom = need > avail ? Math.max(0.6, Math.floor(avail / need * 100) / 100) : 1;
+}
+
 function buildTicket(i, editable, dims){
   var e = editable ? ' contenteditable="true" spellcheck="false"' : '';
   var n = num(i);
@@ -455,58 +579,81 @@ function buildTicket(i, editable, dims){
            (dims && dims.scale ? ';transform:scale(' + dims.scale + ')' : '');
   var h = '';
 
+  /* --- talón recortable --- */
+  var zoomAttr = (bodyZoom < 1 && !(dims && dims.probe)) ? ' style="zoom:' + bodyZoom + '"' : '';
   if(state.showStub){
-    h += '<div class="t-stub">';
-    h += '<div class="t-stub-title"' + e + ed('stubTitle') + '>' + nl(state.stubTitle) + '</div>';
-    h += '<div class="t-stub-num">N&#176; ' + esc(n) + '</div>';
-    h += '<div class="t-stub-fields">';
+    h += '<div class="t-stub"' + zoomAttr + '>';
+    h += '<div class="stub-brand"' + e + ed('stubTitle') + '>' + nl(state.stubTitle) + '</div>';
+    h += '<div class="stub-numwrap"><span class="stub-numlbl">N&#186;</span>';
+    h += '<span class="stub-num">' + esc(n) + '</span></div>';
+    h += '<div class="stub-fields">';
     lines(state.stubFields).forEach(function(f, k){
-      h += '<div class="t-stub-field"><div class="t-stub-label"' + e + ed('stubField', k) + '>' + esc(f) + ':</div><div class="t-stub-line"></div></div>';
+      h += '<div class="stub-field"><span' + e + ed('stubField', k) + '>' + esc(f) + '</span><i></i></div>';
     });
-    h += '</div></div>';
+    h += '</div>';
+    if(state.stubFoot) h += '<div class="stub-foot"' + e + ed('stubFoot') + '>' + esc(state.stubFoot) + '</div>';
+    h += '<div class="t-perf"></div></div>';
   }
 
-  /* --- izquierda --- */
-  h += '<div class="t-left">';
-  h += '<div class="t-deco-frame' + (state.showFrame ? '' : ' plain') + '">';
-  if(state.titleTop) h += '<div class="t-gran"' + e + ed('titleTop') + '>' + esc(state.titleTop) + '</div>';
-  if(state.titleMain) h += '<div class="t-rifa"' + e + ed('titleMain') + '>' + esc(state.titleMain) + '</div>';
-  if(state.titleSub) h += '<div class="t-solidaria"' + e + ed('titleSub') + '>' + esc(state.titleSub) + '</div>';
+  /* --- cuerpo --- */
+  h += '<div class="t-body"' + zoomAttr + '>';
+  h += '<div class="t-head">';
+  if(state.titleTop) h += '<span class="t-eyebrow"' + e + ed('titleTop') + '>' + esc(state.titleTop) + '</span>';
+  if(state.titleMain){
+    // El título encoge con la longitud para no invadir el sello ni saltar de línea.
+    var tl = state.titleMain.trim().length;
+    var ts = tl <= 6 ? 52 : Math.max(24, Math.round(52 * 6 / tl));
+    h += '<span class="t-display" style="font-size:' + ts + 'px"' + e + ed('titleMain') + '>' + esc(state.titleMain) + '</span>';
+  }
+  if(state.titleSub) h += '<span class="t-kicker"><span' + e + ed('titleSub') + '>' + esc(state.titleSub) + '</span></span>';
   h += '</div>';
-  if(state.prizeBar) h += '<div class="t-premio-bar"' + e + ed('prizeBar') + '>' + esc(state.prizeBar) + '</div>';
+
+  if(state.showSeal){
+    var pl = String(state.price).trim().length;
+    var ps = pl <= 5 ? 26 : Math.max(13, Math.round(26 * 5 / pl));
+    h += '<div class="t-seal"><span class="seal-lbl"' + e + ed('priceLabel') + '>' + esc(state.priceLabel) + '</span>';
+    h += '<span class="seal-price" style="font-size:' + ps + 'px"' + e + ed('price') + '>' + esc(state.price) + '</span></div>';
+  }
+
+  if(state.prizeBar) h += '<div class="t-band"' + e + ed('prizeBar') + '>' + esc(state.prizeBar) + '</div>';
+
   h += '<div class="t-prizes">';
   lines(state.prizes).forEach(function(p, k){
-    h += '<div class="t-prize"><span' + e + ed('prize', k) + '>&#8226; ' + esc(p) + '</span></div>';
+    h += '<div class="t-prize"><span' + e + ed('prize', k) + '>' + esc(p) + '</span></div>';
+  });
+  if(state.emojis) h += '<div class="t-emojis"' + e + ed('emojis') + '>' + esc(state.emojis) + '</div>';
+  h += '</div>';
+
+  h += '<div class="t-data">';
+  state.info.forEach(function(it, k){
+    h += '<span class="t-chip"><i>' + esc(it.icon) + '</i><span' + e + ed('infoText', k) + '>' + esc(it.text) + '</span></span>';
   });
   h += '</div>';
-  h += '<div class="t-bottom"><div class="t-number">' + esc(n) + '</div>';
+
+  h += '<div class="t-foot"><div class="t-org">';
+  if(state.orgLabel) h += '<span class="t-org-lbl"' + e + ed('orgLabel') + '>' + esc(state.orgLabel) + '</span>';
+  h += '<span class="t-org-name"' + e + ed('orgName') + '>' + nl(state.orgName) + '</span></div>';
+  h += '<div class="t-numbox"><span class="t-num">' + esc(n) + '</span>';
   if(state.showRange){
     var a = state.prefix + pad(Number(state.start), Number(state.digits)) + state.suffix;
     var b = state.prefix + pad(Number(state.start) + Number(state.qty) - 1, Number(state.digits)) + state.suffix;
-    h += '<div class="t-range">' + esc(a) + ' - ' + esc(b) + '</div>';
+    h += '<span class="t-range">' + esc(a) + ' &ndash; ' + esc(b) + '</span>';
   }
   h += '</div></div>';
 
-  /* --- derecha --- */
-  h += '<div class="t-right">';
-  h += '<div class="t-org-row"><div class="t-org-text">';
-  if(state.orgLabel) h += '<div class="t-org-label"' + e + ed('orgLabel') + '>' + esc(state.orgLabel) + '</div>';
-  h += '<div class="t-org-name"' + e + ed('orgName') + '>' + nl(state.orgName) + '</div></div>';
-  if(state.showSeal){
-    h += '<div class="t-seal"><div' + e + ed('priceLabel') + '>' + esc(state.priceLabel) + '</div>';
-    h += '<div class="t-seal-price"' + e + ed('price') + '>' + esc(state.price) + '</div></div>';
-  }
-  h += '</div>';
-  if(state.emojis) h += '<div class="t-emojis"' + e + ed('emojis') + '>' + esc(state.emojis) + '</div>';
-  h += '<div class="t-info-boxes">';
-  state.info.forEach(function(it, k){
-    h += '<div class="t-info-box"><span class="t-info-icon">' + esc(it.icon) + '</span><span' + e + ed('infoText', k) + '>' + esc(it.text) + '</span></div>';
-  });
-  h += '</div>';
-  if(state.note) h += '<div class="t-contact"' + e + ed('note') + '>' + esc(state.note) + '</div>';
+  if(state.note) h += '<div class="t-note"' + e + ed('note') + '>' + esc(state.note) + '</div>';
   h += '</div>';
 
-  var cls = 'ticket' + (state.showStub ? '' : ' no-stub') + (th >= 280 ? ' tall' : '');
+  /* muescas de la línea de corte */
+  if(state.showStub){
+    h += '<div class="t-notch top"></div>';
+    h += '<div class="t-notch bot"></div>';
+  }
+
+  var cls = 'ticket st-' + state.style +
+            (tw / th >= 2.3 ? ' lay-wide' : ' lay-tall') +
+            (state.showStub ? '' : ' no-stub') +
+            (state.cream ? ' cream' : '');
   return '<div class="' + cls + '" style="' + st + '">' + h + '</div>';
 }
 
@@ -532,7 +679,7 @@ function layout(){
     var cellRatio = cellW / cellH;
     // Se limita el estiramiento para que el contenido no quede disperso.
     if(cellRatio > baseW / baseH) tw = Math.min(baseH * cellRatio, baseW * 2.6);
-    else th = Math.min(baseW / cellRatio, baseH * 1.5);
+    else th = Math.min(baseW / cellRatio, baseH * 2.2);
   }
   var scale = Math.min(cellW * MM / tw, cellH * MM / th);
   if(scale < 0.05) scale = 0.05;
@@ -554,12 +701,27 @@ function buildSheet(from, count, L, editable){
 }
 
 /* ---------- render ---------- */
+function rgba(hex, a){
+  var m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(String(hex).trim());
+  if(!m) return 'rgba(0,0,0,' + a + ')';
+  return 'rgba(' + parseInt(m[1],16) + ',' + parseInt(m[2],16) + ',' + parseInt(m[3],16) + ',' + a + ')';
+}
+
 function render(){
-  document.documentElement.style.setProperty('--c1', state.c1);
-  document.documentElement.style.setProperty('--c2', state.c2);
-  document.documentElement.style.setProperty('--stub-bg', state.c1 + '12');
+  var r = document.documentElement.style;
+  r.setProperty('--c1', state.c1);
+  r.setProperty('--c2', state.c2);
+  r.setProperty('--paper', '#fff');
+  r.setProperty('--ink', '#1b1a18');
+  r.setProperty('--ink-80', 'rgba(27,26,24,.82)');
+  r.setProperty('--ink-55', 'rgba(27,26,24,.58)');
+  [7,12,20,25,35,45,50,55,60,75].forEach(function(p){
+    r.setProperty('--c1-' + (p < 10 ? '0' + p : p), rgba(state.c1, p / 100));
+  });
+  r.setProperty('--c2-25', rgba(state.c2, .25));
 
   var L = layout();
+  updateBodyZoom(L.tw, L.th);
   var pages = Math.max(1, Math.ceil(state.qty / L.per));
   if(page >= pages) page = pages - 1;
   if(idx >= state.qty) idx = state.qty - 1;
@@ -614,9 +776,10 @@ function fitSheet(L){
 
 /* ---------- panel <-> estado ---------- */
 var TEXT_FIELDS = ['prefix','suffix','titleTop','titleMain','titleSub','prizeBar','prizes',
-  'orgLabel','orgName','priceLabel','price','emojis','note','stubTitle','stubFields','c1','c2','paper','orient'];
+  'orgLabel','orgName','priceLabel','price','emojis','note','stubTitle','stubFields','stubFoot',
+  'c1','c2','paper','orient'];
 var NUM_FIELDS = ['qty','start','digits','margin','gap','perSheet','tHeight'];
-var BOOL_FIELDS = ['showRange','showFrame','showSeal','showStub','cutLines','autoFit'];
+var BOOL_FIELDS = ['showRange','showSeal','showStub','cutLines','autoFit','cream'];
 
 function syncPanel(){
   TEXT_FIELDS.concat(NUM_FIELDS).forEach(function(f){
@@ -671,6 +834,10 @@ function paintChips(){
   ts.innerHTML = THEMES.map(function(t){
     return '<button class="chip' + (state.c1.toLowerCase() === t.a ? ' on' : '') + '" data-th="' + t.a + '|' + t.b + '">' + t.n + '</button>';
   }).join('');
+  var st = document.getElementById('chipsStyle');
+  st.innerHTML = STYLES.map(function(s){
+    return '<button class="chip' + (state.style === s.k ? ' on' : '') + '" data-st="' + s.k + '">' + s.n + '</button>';
+  }).join('');
 }
 
 function renderInfoEditor(){
@@ -712,6 +879,7 @@ document.querySelector('.panel').addEventListener('click', function(e){
   if(c.dataset.per){ state.perSheet = +c.dataset.per; if(state.cols > state.perSheet) state.cols = state.perSheet; }
   else if(c.dataset.col){ state.cols = Math.min(+c.dataset.col, state.perSheet); }
   else if(c.dataset.th){ var p = c.dataset.th.split('|'); state.c1 = p[0]; state.c2 = p[1]; }
+  else if(c.dataset.st){ state.style = c.dataset.st; }
   save(); syncPanel(); render();
 });
 
@@ -770,6 +938,7 @@ function setPageSize(L){
 }
 function printRange(from, count){
   var L = layout();
+  updateBodyZoom(L.tw, L.th);
   setPageSize(L);
   var html = '';
   for(var i = from; i < from + count; i += L.per){
